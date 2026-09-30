@@ -17,8 +17,6 @@ namespace PimpMyArchonexus
         public PimpMyArchonexusMod(ModContentPack content) : base(content)
         {
             settings = GetSettings<PimpMyArchonexusSettings>();
-
-            // Initialisation globale de Harmony
             var harmony = new Harmony("com.pimpmyarchonexus.patch16");
             harmony.PatchAll();
             LongEventHandler.ExecuteWhenFinished(ApplyLiveWealthToStoryteller);
@@ -56,7 +54,6 @@ namespace PimpMyArchonexus
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
 
-            // 1. Max colonists number
             listingStandard.Label("Max colonists number :");
             string maxColonistsBuffer = settings.maxColonists.ToString();
             maxColonistsBuffer = listingStandard.TextEntry(maxColonistsBuffer);
@@ -66,7 +63,6 @@ namespace PimpMyArchonexus
             }
             listingStandard.Gap();
 
-            // 2. Max animals number
             listingStandard.Label("Max animals number :");
             string maxAnimalsBuffer = settings.maxAnimals.ToString();
             maxAnimalsBuffer = listingStandard.TextEntry(maxAnimalsBuffer);
@@ -76,7 +72,6 @@ namespace PimpMyArchonexus
             }
             listingStandard.Gap();
 
-            // 3. Max relics number
             listingStandard.Label("Max relics number :");
             string maxRelicsBuffer = settings.maxRelics.ToString();
             maxRelicsBuffer = listingStandard.TextEntry(maxRelicsBuffer);
@@ -86,7 +81,6 @@ namespace PimpMyArchonexus
             }
             listingStandard.Gap();
 
-            // 4. Max items number
             listingStandard.Label("Max items number :");
             string maxItemsBuffer = settings.maxItems.ToString();
             maxItemsBuffer = listingStandard.TextEntry(maxItemsBuffer);
@@ -96,7 +90,6 @@ namespace PimpMyArchonexus
             }
             listingStandard.Gap();
 
-            // 5. Trigger wealth
             listingStandard.Label($"Trigger wealth (Quest appearance, this requires a game restart to take effect) : {Mathf.RoundToInt(settings.minWealthTrigger)}");
             string triggerWealthBuffer = Mathf.RoundToInt(settings.minWealthTrigger).ToString();
             triggerWealthBuffer = listingStandard.TextEntry(triggerWealthBuffer);
@@ -106,7 +99,6 @@ namespace PimpMyArchonexus
             }
             listingStandard.Gap();
 
-            // 6. Required wealth to accept sale
             listingStandard.Label($"Required wealth to accept sale : {Mathf.RoundToInt(settings.minWealth)}");
             string minWealthBuffer = Mathf.RoundToInt(settings.minWealth).ToString();
             minWealthBuffer = listingStandard.TextEntry(minWealthBuffer);
@@ -177,7 +169,6 @@ namespace PimpMyArchonexus
         {
             if (PimpMyArchonexusMod.settings == null) return true;
 
-            // Récupération des valeurs configurées par l'utilisateur
             float customWealth = PimpMyArchonexusMod.settings.minWealth;
             int customColonists = PimpMyArchonexusMod.settings.maxColonists;
             int customAnimals = PimpMyArchonexusMod.settings.maxAnimals;
@@ -185,7 +176,6 @@ namespace PimpMyArchonexus
             Quest quest = QuestGen.quest;
             Slate slate = QuestGen.slate;
 
-            // Utilisation de la réflexion pour accéder au champ 'map' protégé de la classe abstraite
             var mapField = typeof(QuestNode_Root_ArchonexusVictory_Cycle).GetField("map", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             Map currentMap = QuestGen_Get.GetMap(mustBeInfestable: false, null, canBeSpace: true);
             mapField?.SetValue(__instance, currentMap);
@@ -194,7 +184,6 @@ namespace PimpMyArchonexus
             string text2 = QuestGen.GenerateNewSignal("SendLetterReminder");
             QuestGen.GenerateNewSignal("ActivateLetterReminderSignal");
 
-            // Injection technique de votre richesse personnalisée
             QuestPart_RequirementsToAcceptPlayerWealth reqWealth = new QuestPart_RequirementsToAcceptPlayerWealth();
             reqWealth.requiredPlayerWealth = customWealth;
             quest.AddPart(reqWealth);
@@ -227,7 +216,6 @@ namespace PimpMyArchonexus
                 quest.Letter(LetterDefOf.PositiveEvent, null, null, null, null, useColonistsFromCaravanArg: false, QuestPart.SignalListenMode.NotYetAcceptedOnly, null, filterDeadPawnsFromLookTargets: false, label: "LetterLabelArchonexusWealthReached".Translate(text3), text: "LetterTextArchonexusWealthReached".Translate(text3));
             }, null, filterWealth.outSignal, null, null, QuestPart.SignalListenMode.NotYetAcceptedOnly);
 
-            // Utilisation de la réflexion pour appeler la propriété abstraite ArchonexusCycle
             var cycleProperty = typeof(QuestNode_Root_ArchonexusVictory_Cycle).GetProperty("ArchonexusCycle", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             int currentCycle = (int)(cycleProperty?.GetValue(__instance) ?? 1);
 
@@ -251,7 +239,6 @@ namespace PimpMyArchonexus
                 }
             }
 
-            // Mise à jour de la Slate (affichage texte et variables de quête)
             slate.Set("playerSettlements", list);
             slate.Set("playerSettlementsCount", list.Count);
             slate.Set("colonistsAllowed", customColonists);
@@ -261,7 +248,7 @@ namespace PimpMyArchonexus
             slate.Set("map", currentMap);
             slate.Set("mapParent", currentMap.Parent);
 
-            return false; // On bloque complètement la méthode d'origine pour appliquer notre logique modifiée
+            return false;
         }
     }
 }
