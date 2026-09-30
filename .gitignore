@@ -1,6 +1,8 @@
 bin/
 obj/
 *.csproj.user
+.vs
+Properties/
 
 .DS_Store
 Thumbs.db
