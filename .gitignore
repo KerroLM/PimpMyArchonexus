@@ -1,0 +1,8 @@
+bin/
+obj/
+*.csproj.user
+
+.DS_Store
+Thumbs.db
+
+About/PublishedFileId.txt
